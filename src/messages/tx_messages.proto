@@ -1,0 +1,117 @@
+import "rpc_messages.proto";
+
+message PbRpcTxPublicGetServerConfigResult {
+    required bool Succeeded = 1;
+    required int32 NumPartitions = 2;
+    required int32 NumDataCenters = 3;
+    required int32 PartitionReplicationFactor = 4;
+    required int32 replicaId = 5;
+}
+
+// ============================= Public client related messages =======================================
+
+message PbRpcPublicStartArg {
+    optional PbPhysicalTimeSpec UST = 1; // global remote stable time
+}
+
+message PbRpcPublicStartResult {
+    required bool Succeeded = 1;
+    required int64 ID = 2;
+    optional PbPhysicalTimeSpec UST = 3; // global remote stable time
+}
+
+message PbRpcPublicReadArg {
+    optional int64 ID = 1;
+    repeated bytes Key = 2;
+    optional bool noTxId = 3;
+}
+
+message PbRpcPublicReadResult {
+    required bool Succeeded = 1;
+    repeated bytes Value = 2;
+    optional int64 ID = 3;
+}
+
+message PbRpcPublicCommitArg {
+    required int64 ID = 1;
+    repeated bytes Key = 2;
+    repeated bytes Value = 3;
+    optional PbPhysicalTimeSpec LCT = 4; //latest client commit time
+
+}
+
+message PbRpcPublicCommitResult {
+    required bool Succeeded = 1;
+    required PbPhysicalTimeSpec CT = 2; //commit time
+}
+
+message PbRpcPublicGetRemotePartitionsIdsResult {
+    required bool Succeeded = 1;
+    repeated int64 pids = 2;
+}
+
+// ============================= Transactional reads related messages =======================================
+
+
+message PbRpcInternalTxSliceReadKeysArg {
+    repeated bytes Key = 1;
+    optional PbPhysicalTimeSpec UST = 2;
+    optional int64 id = 3;
+    optional int64 srcPartition = 4;
+    optional int64 srcDataCenter = 5;
+}
+
+message PbRpcInternalTxSliceReadKeysResult {
+    required bool Succeeded = 1;
+    repeated bytes Value = 2;
+    optional int32 SrcPartition = 3; //Source partition of the read value
+    optional int32 SrcDataCenter = 4; //Source datacenter of the read value
+    optional int64 id = 5;
+    optional double waitedXact = 6;
+}
+
+// ======================================= TRANSACTION COMMIT PHASE ==========================================
+
+
+message PbRpcPrepareRequestArg {
+    required int64 id = 1;
+    optional PbPhysicalTimeSpec UST = 2;
+    required PbPhysicalTimeSpec HT = 3;
+    repeated bytes Key = 4;
+    repeated bytes Value = 5;
+    required int64 SrcPartition = 6;
+    required int64 SrcDataCenter = 7;
+}
+
+message PbRpcPrepareRequestResult {
+    required int64 id = 1;
+    required PbPhysicalTimeSpec PT = 2; //prepare time
+    required int64 srcPartition = 3;
+    required int64 srcDataCenter = 4;
+    optional double blockDuration = 5;
+}
+
+message PbRpcInternalPrepareReplyResult {
+    required int64 id = 1;
+    required PbPhysicalTimeSpec PT = 2; //prepare time
+    required int64 srcPartition = 3;
+    required int64 srcDataCenter = 4;
+    optional double blockDuration = 5;
+}
+
+// ======================================= STABILIZATION PROTOCOL ==========================================
+
+message PbRpcGST {
+    required PbPhysicalTimeSpec GST = 1;
+}
+
+message PbRpcLST {
+    required int32 Round = 1;
+    required PbPhysicalTimeSpec LST = 2;
+}
+
+message PbRpcGSTandUST {
+    required PbPhysicalTimeSpec GST = 1;
+    required PbPhysicalTimeSpec UST = 2;
+
+}
